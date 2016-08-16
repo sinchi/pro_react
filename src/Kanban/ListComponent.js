@@ -6,12 +6,8 @@ import  FontAwesome  from 'react-fontawesome';
 
 export class ListComponent extends Component {
   render(){
-    var cards = _.map(this.props.cards, (card) => {
-      return <CardComponent key={ card.id } id={ card.id }
-                  title={ card.title }
-                  description={ card.description }
-                  color={ card.color }
-                  tasks={ card.tasks } />
+    let cards = _.map(this.props.cards, (card) => {
+      return <CardComponent key={ card.id } taskCallbacks={ this.props.taskCallbacks } id={ card.id } { ...card } />
     });
 
     return (
@@ -31,5 +27,6 @@ export class ListComponent extends Component {
 
 ListComponent.propTypes = {
   cards: PropTypes.arrayOf(PropTypes.object),
-  title : PropTypes.string.isRequired
+  title : PropTypes.string.isRequired,
+  taskCallbacks: PropTypes.object
 };
