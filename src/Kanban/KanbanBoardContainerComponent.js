@@ -167,7 +167,7 @@ export class KanbanBoardContainerComponent extends Component {
     let cardIndex = this.state.cards.findIndex((card) => card.id === cardId);
     let card = this.state.cards[cardIndex];
 
-    // Only proced if hovering over a different list
+    // Only proceed if hovering over a different list
     if(card.status !== listId){
       // set the component state to the mutated object
       this.setState(update(this.state, {
