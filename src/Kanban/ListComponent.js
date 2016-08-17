@@ -1,24 +1,37 @@
 import React, { Component, PropTypes } from 'react';
 import { _ } from 'underscore';
 
-import { CardComponent } from './CardComponent.js';
-import  FontAwesome  from 'react-fontawesome';
+import { DropTarget } from 'react-dnd';
+import constants from '../modules/constants';
 
-export class ListComponent extends Component {
+import  CardComponent  from './CardComponent.js';
+//import  FontAwesome  from 'react-fontawesome';
+
+
+const listTargetSpec = {
+    hover(props, monitor){
+      const draggedId = monitor.getItem().id;
+      props.cardCallbacks.updateCardStatus(draggedId, props.id)
+    }
+}
+
+function collect(connect, monitor){
+  return {
+    connectDropTarget: connect.dropTarget()
+  };
+}
+
+class ListComponent extends Component {
   render(){
+    const { connectDropTarget } = this.props;
+
     let cards = _.map(this.props.cards, (card) => {
-      return <CardComponent key={ card.id } taskCallbacks={ this.props.taskCallbacks } id={ card.id } { ...card } />
+      return <CardComponent key={ card.id } cardCallbacks={  this.props.cardCallbacks} taskCallbacks={ this.props.taskCallbacks } id={ card.id } { ...card } />
     });
 
-    return (
+    return connectDropTarget(
       <div className="list">
-        <h1>{this.props.title} <FontAwesome
-        className='super-crazy-colors'
-        name='rocket'
-        size='2x'
-        spin
-        style={{ textShadow: '0 1px 0 rgba(0, 0, 0, 0.1)' }}
-      /></h1>
+        <h1>{this.props.title}</h1>
         {cards}
       </div>
     );
@@ -28,5 +41,9 @@ export class ListComponent extends Component {
 ListComponent.propTypes = {
   cards: PropTypes.arrayOf(PropTypes.object),
   title : PropTypes.string.isRequired,
-  taskCallbacks: PropTypes.object
+  taskCallbacks: PropTypes.object,
+  cardCallbacks: PropTypes.object,
+  connectDropTarget: PropTypes.func.isRequired
 };
+
+export default DropTarget(constants.CARD, listTargetSpec, collect)(ListComponent);

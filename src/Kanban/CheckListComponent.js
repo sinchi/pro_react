@@ -2,6 +2,7 @@ import React, { Component, PropTypes } from 'react';
 
 import { _ } from 'underscore';
 
+
 export class CheckListComponent extends Component {
 
   checkInputKeyPress(event){

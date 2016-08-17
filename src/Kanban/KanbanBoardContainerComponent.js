@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 
-import { KanbanBoardComponent } from './KanbanBoardComponent.js';
+import  KanbanBoardComponent  from './KanbanBoardComponent.js';
 import 'whatwg-fetch';
 import 'babel-polyfill';
 import  update  from 'react-addons-update';
@@ -163,7 +163,43 @@ export class KanbanBoardContainerComponent extends Component {
     });
   }
 
+  updateCardStatus(cardId, listId){
+    let cardIndex = this.state.cards.findIndex((card) => card.id === cardId);
+    let card = this.state.cards[cardIndex];
 
+    // Only proced if hovering over a different list
+    if(card.status !== listId){
+      // set the component state to the mutated object
+      this.setState(update(this.state, {
+        cards:{
+          [cardIndex]: {
+            status: { $set: listId }
+          }
+        }
+      }));
+    }
+  }
+
+  updateCardPosition(cardId, afterId){
+    // Only proceed if hovering over a different card
+    if(cardId !== afterId){
+      // Find the index of the card
+      let cardIndex = this.state.cards.findIndex((card) => card.id === cardId);
+      // get the current card
+      let card = this.state.cards[cardIndex];
+      // Find the index of the card the user is hovering over
+      let afterIndex = this.state.cards.findIndex((card) => card.id === afterId);
+      // Use splice to remove the card and reinsert it at the new index
+      this.setState(update(this.state, {
+        cards:{
+          $splice: [
+            [cardIndex, 1],
+            [afterIndex, 0, card]
+          ]
+        }
+      }));
+    }
+  }
 
 
   render(){
@@ -173,6 +209,10 @@ export class KanbanBoardContainerComponent extends Component {
                               toggle: this.toggleTask.bind(this),
                               delete: this.deleteTask.bind(this),
                               add: this.addTask.bind(this)
+                            }}
+                            cardCallbacks={{
+                              updateCardPosition: this.updateCardPosition.bind(this),
+                              updateCardStatus: this.updateCardStatus.bind(this)
                             }}/>
     )
   }
