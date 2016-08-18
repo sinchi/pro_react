@@ -10,8 +10,10 @@ import  CardComponent  from './CardComponent.js';
 
 const listTargetSpec = {
     hover(props, monitor){
-      const draggedId = monitor.getItem().id;      
-      props.cardCallbacks.updateCardStatus(draggedId, props.id)
+      const draggedId = monitor.getItem().id;
+      console.log("hover", `draggedId:${draggedId} - list:${props.id}`);
+      console.log("props", props);
+      props.cardCallbacks.updateCardStatus(draggedId, props.id);
     }
 }
 

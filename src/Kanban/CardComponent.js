@@ -11,7 +11,7 @@ import { Link } from 'react-router';
 
 const cardDragSpec = {
   beginDrag(props){
-    console.log("beginDrag");
+    console.log("beginDrag", `id:${props.id} - status:${props.status}`);
     return {
       id: props.id,
       status: props.status
@@ -19,9 +19,7 @@ const cardDragSpec = {
   },
 
   endDrag(props){
-    console.log("endDrag");
-    console.log("id", props.id);
-    console.log("status", props.status);
+    console.log("endDrag", `id:${props.id} - status:${props.status}`);
     props.cardCallbacks.persistCardDrag(props.id, props.status);
   }
 };

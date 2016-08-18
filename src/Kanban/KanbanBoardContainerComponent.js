@@ -25,6 +25,7 @@ class KanbanBoardContainerComponent extends Component {
   }
 
   addCard(card){
+    console.log("addCard", card);
     let prevState = this.state;
     if(card.id === null){
       let card = Object.assign({}, card, {id: Date.now()});
@@ -54,7 +55,7 @@ class KanbanBoardContainerComponent extends Component {
     })
   }
 
-  editCard(card){
+  updateCard(card){
     let prevState = this.state;
     let cardIndex = this.state.cards.findIndex((c) => c.id === card.id);
     let nextState = update(this.state.cards, {
@@ -224,7 +225,8 @@ class KanbanBoardContainerComponent extends Component {
   updateCardStatus(cardId, listId){
     let cardIndex = this.state.cards.findIndex((card) => card.id === cardId);
     let card = this.state.cards[cardIndex];
-
+    console.log("updateCardStatus", cardId+" "+listId);
+    console.log(`card status:${card.status} - listId:${listId}`);
     // Only proceed if hovering over a different list
     if(card.status !== listId){
       // set the component state to the mutated object
@@ -235,6 +237,9 @@ class KanbanBoardContainerComponent extends Component {
           }
         }
       }));
+
+      console.log("card before", card);
+      console.log("card after", this.state.cards[cardId]);
     }
   }
 
@@ -262,7 +267,7 @@ class KanbanBoardContainerComponent extends Component {
   persistCardDrag(cardId, status){
       // Find the index of the card
       let cardIndex = this.state.cards.findIndex((card) => card.id === cardId);
-
+      console.log("persistCardDrag", cardId+" "+status);
     // Get the current card
     let card = this.state.cards[cardIndex];
 
@@ -312,7 +317,7 @@ class KanbanBoardContainerComponent extends Component {
       },
       cardCallbacks: {
         addCard: this.addCard.bind(this),
-        updateCard: this.editCard.bind(this),
+        updateCard: this.updateCard.bind(this),
         updateCardStatus: this.updateCardStatus,
         updateCardPosition: this.updateCardPosition,
         persistCardDrag: this.persistCardDrag.bind(this)
