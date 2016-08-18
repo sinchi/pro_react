@@ -1,10 +1,9 @@
 import React, { Component } from 'react';
-
-import  KanbanBoardComponent  from './KanbanBoardComponent.js';
 import 'whatwg-fetch';
 import 'babel-polyfill';
 import  update  from 'react-addons-update';
 import { throttle } from '../modules/utils.js';
+import KanbanBoardComponent from './KanbanBoardComponent';
 
 const API_URL = 'http://kanbanapi.pro-react.com';
 const API_HEADERS = {
@@ -12,7 +11,7 @@ const API_HEADERS = {
   'Authorization': 'sinchi'
 };
 
-export class KanbanBoardContainerComponent extends Component {
+class KanbanBoardContainerComponent extends Component {
   constructor(){
     super(...arguments);
     this.state = {
@@ -25,12 +24,65 @@ export class KanbanBoardContainerComponent extends Component {
     this.updateCardPosition = throttle(this.updateCardPosition.bind(this), 500);
   }
 
+  addCard(card){
+    let prevState = this.state;
+    if(card.id === null){
+      let card = Object.assign({}, card, {id: Date.now()});
+    }
+    // Create new Objet and push the new card to the array of cards
+    let nextState = update(this.state.cards,{$push:[card]});
+    this.setState({ cards: nextState });
+
+    fetch(`${API_URL}/cards`, {
+      method:'post',
+      headers: API_HEADERS,
+      body: JSON.stringify(card)
+    })
+    .then((response) => {
+      if(response.ok){
+        return response.json();
+      }else{
+        throw new Error("Server response wasn't OK");
+      }
+    })
+    .then((responseData) =>{
+      card.id = responseData.id;
+      this.setState({ cards:  nextState})
+    })
+    .catch((error) => {
+      this.setState(prevState);
+    })
+  }
+
+  editCard(card){
+    let prevState = this.state;
+    let cardIndex = this.state.cards.findIndex((c) => c.id === card.id);
+    let nextState = update(this.state.cards, {
+      [cardIndex]:{ $set:card }
+    });
+
+    this.setState({ cards: nextState });
+    fetch(`${API_URL}/cards/${card.id}`, {
+      method: 'put',
+      headers: API_HEADERS,
+      body: JSON.stringify(card)
+    })
+    .then((response) => {
+      if(!response.ok){
+        throw new Error('Server wasnt OK');
+      }
+    })
+    .catch((error) => {
+      console.error('Fetch error:', error);
+      this.setState(prevState);
+    })
+  }
+
   componentDidMount(){
     fetch(`${API_URL}/cards`, { headers: API_HEADERS })
     .then((response) => response.json())
     .then((responseData) => {
       this.setState({ cards: responseData })
-      window.state = this.state;
     })
     .catch((error) => {
       console.log('Error fetching and parsing data', error);
@@ -238,19 +290,38 @@ export class KanbanBoardContainerComponent extends Component {
     });
 }
 
+// <KanbanBoardComponent cards={ this.state.cards }
+//                       taskCallbacks={{
+//                         toggle: this.toggleTask.bind(this),
+//                         delete: this.deleteTask.bind(this),
+//                         add: this.addTask.bind(this)
+//                       }}
+//                       cardCallbacks={{
+//                         updateCardPosition: this.updateCardPosition,
+//                         updateCardStatus: this.updateCardStatus,
+//                         persistCardDrag: this.persistCardDrag.bind(this)
+//                       }}/>
+
   render(){
-    return (
-      <KanbanBoardComponent cards={ this.state.cards }
-                            taskCallbacks={{
-                              toggle: this.toggleTask.bind(this),
-                              delete: this.deleteTask.bind(this),
-                              add: this.addTask.bind(this)
-                            }}
-                            cardCallbacks={{
-                              updateCardPosition: this.updateCardPosition,
-                              updateCardStatus: this.updateCardStatus,
-                              persistCardDrag: this.persistCardDrag.bind(this)
-                            }}/>
-    )
+    let KanbanBoard = this.props.children && React.cloneElement(this.props.children, {
+      cards: this.state.cards,
+      taskCallbacks: {
+        toggle: this.toggleTask.bind(this),
+        delete: this.deleteTask.bind(this),
+        add: this.addTask.bind(this)
+      },
+      cardCallbacks: {
+        addCard: this.addCard.bind(this),
+        updateCard: this.editCard.bind(this),
+        updateCardStatus: this.updateCardStatus,
+        updateCardPosition: this.updateCardPosition,
+        persistCardDrag: this.persistCardDrag.bind(this)
+      }
+    });
+
+    return KanbanBoard;
   }
+
 }
+
+export default KanbanBoardContainerComponent;
